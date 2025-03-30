@@ -245,10 +245,18 @@
         <p class="signature">
             Subagyo Family
         </p>
+        <!-- Tombol Kontrol Musik -->
+    <button class="music-control" id="musicControl">
+        <i class="fas fa-music"></i>
+    </button>
     </div>
+    <!-- Audio Element -->
+    <audio id="backgroundMusic" loop>
+        <source src="takbir.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
 
     <script>
-        // Optimasi untuk mobile
         document.addEventListener('touchstart', function() {}, {passive: true});
         
         // Animasi saat halaman dimuat
@@ -256,6 +264,52 @@
         elements.forEach((el, index) => {
             el.style.animationDelay = `${index * 0.15}s`;
         });
+
+        // Kontrol Musik
+        const musicControl = document.getElementById('musicControl');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        let isPlaying = false;
+
+        // Untuk memenuhi kebijakan autoplay browser, mulai musik setelah interaksi pengguna
+        function initAudio() {
+            // Coba play audio (akan dihentikan oleh kebijakan browser)
+            backgroundMusic.volume = 0.5;
+            const playPromise = backgroundMusic.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Audio dimulai otomatis
+                    isPlaying = true;
+                    musicControl.innerHTML = '<i class="fas fa-pause"></i>';
+                })
+                .catch(error => {
+                    // Autoplay dicegah, tunggu interaksi pengguna
+                    isPlaying = false;
+                    musicControl.innerHTML = '<i class="fas fa-music"></i>';
+                });
+            }
+        }
+
+        // Inisialisasi audio setelah halaman dimuat
+        window.addEventListener('load', initAudio);
+
+        // Toggle musik saat tombol diklik
+        musicControl.addEventListener('click', function() {
+            if (isPlaying) {
+                backgroundMusic.pause();
+                musicControl.innerHTML = '<i class="fas fa-music"></i>';
+            } else {
+                backgroundMusic.play();
+                musicControl.innerHTML = '<i class="fas fa-pause"></i>';
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // Untuk mobile: mulai musik setelah interaksi pertama
+        document.body.addEventListener('click', function firstInteraction() {
+            initAudio();
+            document.body.removeEventListener('click', firstInteraction);
+        }, { once: true });
     </script>
 </body>
 </html>
